@@ -1,0 +1,1731 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0a0a14">
+    <meta name="description" content="مؤقت برو - تطبيق مؤقت احترافي متعدد الاستخدامات">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="مؤقت برو">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>⏱️ مؤقت برو</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #0a0a14;
+            --bg2: #12121f;
+            --card: rgba(18, 18, 32, 0.85);
+            --card-border: rgba(255,255,255,0.07);
+            --card-border-hover: rgba(255,255,255,0.14);
+            --text: #eeeef8;
+            --text2: #9898b0;
+            --text3: #55556a;
+            --a1: #7c6af5;
+            --a1g: rgba(124,106,245,0.35);
+            --a2: #22d3ee;
+            --a2g: rgba(34,211,238,0.3);
+            --red: #f43f5e;
+            --green: #10b981;
+            --yellow: #f59e0b;
+            --ring-r: 108;
+            --circum: 678.58;
+            --blur: 24px;
+            --r1: 22px;
+            --r2: 16px;
+            --r3: 12px;
+            --r4: 8px;
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+            --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+            --mono: 'JetBrains Mono', monospace;
+            --sans: 'Tajawal', sans-serif;
+        }
+        .light {
+            --bg: #f5f5fa;
+            --bg2: #ffffff;
+            --card: rgba(255,255,255,0.9);
+            --card-border: rgba(0,0,0,0.07);
+            --card-border-hover: rgba(0,0,0,0.14);
+            --text: #111128;
+            --text2: #5a5a72;
+            --text3: #aaaabc;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--sans);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 16px 16px calc(env(safe-area-inset-bottom) + 16px);
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            transition: background 0.4s var(--ease), color 0.4s var(--ease);
+        }
+
+        #bgCanvas {
+            position: fixed; inset: 0; z-index: 0;
+            pointer-events: none; opacity: 0.55;
+        }
+
+        .app {
+            position: relative; z-index: 1;
+            width: 100%; max-width: 500px;
+            display: flex; flex-direction: column; gap: 14px;
+            padding-top: 8px;
+        }
+
+        .header {
+            display: flex; align-items: center;
+            justify-content: space-between; gap: 10px;
+        }
+        .brand {
+            display: flex; align-items: center; gap: 10px;
+        }
+        .brand-icon {
+            width: 42px; height: 42px;
+            border-radius: var(--r3);
+            background: linear-gradient(135deg, var(--a1), #a855f7);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 4px 20px var(--a1g);
+            animation: brandPulse 4s ease-in-out infinite;
+            flex-shrink: 0;
+        }
+        @keyframes brandPulse {
+            0%,100% { box-shadow: 0 4px 20px var(--a1g); }
+            50% { box-shadow: 0 4px 36px rgba(124,106,245,0.65); }
+        }
+        .brand-name {
+            font-size: 1.25rem; font-weight: 900;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, var(--text) 30%, var(--a2));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hbtns {
+            display: flex; gap: 6px; align-items: center;
+        }
+        .hbtn {
+            width: 38px; height: 38px; border-radius: 50%;
+            border: 1px solid var(--card-border);
+            background: var(--card);
+            backdrop-filter: blur(var(--blur));
+            -webkit-backdrop-filter: blur(var(--blur));
+            color: var(--text); cursor: pointer;
+            font-size: 17px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.25s var(--ease);
+            outline: none; position: relative;
+        }
+        .hbtn:hover { border-color: var(--card-border-hover); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
+        .hbtn:active { transform: scale(0.92); transition: 0.1s; }
+        .hbtn.on { border-color: var(--a1); background: rgba(124,106,245,0.18); box-shadow: 0 0 16px var(--a1g); }
+        .install-badge {
+            position: absolute; top: 5px; right: 5px;
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--red);
+            animation: blink 1.8s ease-in-out infinite;
+        }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+        .install-banner {
+            background: linear-gradient(135deg, rgba(124,106,245,0.15), rgba(34,211,238,0.1));
+            border: 1px solid rgba(124,106,245,0.3);
+            border-radius: var(--r2);
+            padding: 12px 16px;
+            display: flex; align-items: center; gap: 12px;
+            animation: slideDown 0.4s var(--spring);
+        }
+        .install-banner.hidden { display: none; }
+        @keyframes slideDown { from{opacity:0;transform:translateY(-12px)} to{opacity:1;transform:translateY(0)} }
+        .install-banner-icon { font-size: 24px; flex-shrink: 0; }
+        .install-banner-text { flex: 1; }
+        .install-banner-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 2px; }
+        .install-banner-sub { font-size: 0.75rem; color: var(--text2); }
+        .install-banner-btn {
+            padding: 8px 16px; border-radius: 25px;
+            background: var(--a1); color: #fff;
+            border: none; cursor: pointer;
+            font-weight: 700; font-size: 0.82rem;
+            font-family: var(--sans);
+            box-shadow: 0 4px 16px var(--a1g);
+            transition: all 0.25s var(--ease);
+            flex-shrink: 0;
+        }
+        .install-banner-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 24px var(--a1g); }
+        .install-banner-close {
+            width: 28px; height: 28px; border-radius: 50%;
+            border: none; background: transparent;
+            color: var(--text3); cursor: pointer; font-size: 16px;
+            display: flex; align-items: center; justify-content: center;
+            transition: color 0.2s;
+        }
+        .install-banner-close:hover { color: var(--text); }
+
+        .tabs {
+            display: flex; gap: 5px;
+            background: var(--card);
+            backdrop-filter: blur(var(--blur));
+            -webkit-backdrop-filter: blur(var(--blur));
+            border: 1px solid var(--card-border);
+            border-radius: var(--r2);
+            padding: 5px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        .tab {
+            flex: 1; padding: 11px 8px;
+            border-radius: var(--r3);
+            border: none; background: transparent;
+            color: var(--text2); cursor: pointer;
+            font-size: 0.85rem; font-weight: 700;
+            font-family: var(--sans);
+            transition: all 0.25s var(--ease);
+            white-space: nowrap; outline: none;
+        }
+        .tab:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+        .tab.active {
+            background: var(--a1); color: #fff;
+            box-shadow: 0 4px 16px var(--a1g);
+        }
+
+        .timer-card {
+            background: var(--card);
+            backdrop-filter: blur(var(--blur));
+            -webkit-backdrop-filter: blur(var(--blur));
+            border: 1px solid var(--card-border);
+            border-radius: var(--r1);
+            padding: 28px 20px 22px;
+            display: flex; flex-direction: column;
+            align-items: center; gap: 22px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            position: relative; overflow: hidden;
+            transition: box-shadow 0.5s var(--ease);
+        }
+        .timer-card::before {
+            content: ''; position: absolute;
+            top: -60%; left: -60%; width: 220%; height: 220%;
+            background: radial-gradient(circle at 40% 40%, rgba(124,106,245,0.04) 0%, transparent 55%);
+            animation: shimmer 10s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes shimmer {
+            0%,100%{transform:translate(0,0) rotate(0deg)}
+            33%{transform:translate(3%,-2%) rotate(1deg)}
+            66%{transform:translate(-2%,3%) rotate(-1deg)}
+        }
+        .timer-card.pulse {
+            box-shadow: 0 0 80px rgba(244,63,94,0.5), 0 20px 60px rgba(0,0,0,0.4);
+        }
+
+        .ring-wrap {
+            position: relative; width: 230px; height: 230px; flex-shrink: 0;
+        }
+        .ring-svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+        .ring-bg { fill: none; stroke: var(--card-border); stroke-width: 9; }
+        .ring-fill {
+            fill: none; stroke: var(--a2); stroke-width: 9; stroke-linecap: round;
+            stroke-dasharray: var(--circum); stroke-dashoffset: 0;
+            transition: stroke-dashoffset 0.32s var(--ease), stroke 0.4s;
+            filter: drop-shadow(0 0 10px var(--a2g));
+        }
+        .ring-fill.m-pomo { stroke: var(--red); filter: drop-shadow(0 0 10px rgba(244,63,94,0.4)); }
+        .ring-fill.m-stop { stroke: var(--green); filter: drop-shadow(0 0 10px rgba(16,185,129,0.4)); }
+
+        .ring-dot {
+            position: absolute; width: 10px; height: 10px;
+            border-radius: 50%; background: var(--a2);
+            box-shadow: 0 0 16px var(--a2g);
+            transform: translate(-50%, -50%);
+            transition: left 0.32s var(--ease), top 0.32s var(--ease),
+                        background 0.4s, box-shadow 0.4s;
+            pointer-events: none;
+        }
+
+        .ring-center {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center; pointer-events: none; width: 160px;
+        }
+        .time-txt {
+            font-family: var(--mono);
+            font-size: 3rem; font-weight: 700;
+            letter-spacing: 2px; line-height: 1;
+            color: var(--text);
+            text-shadow: 0 0 30px rgba(255,255,255,0.1);
+        }
+        .time-lbl {
+            font-size: 0.72rem; color: var(--text3);
+            margin-top: 5px; font-weight: 500; letter-spacing: 0.8px;
+        }
+        .phase-tag {
+            display: inline-block;
+            font-size: 0.72rem; font-weight: 700;
+            padding: 3px 12px; border-radius: 20px;
+            background: rgba(255,255,255,0.06);
+            margin-top: 7px;
+        }
+
+        .ms-bar {
+            font-family: var(--mono);
+            font-size: 0.85rem; color: var(--text3);
+            letter-spacing: 1px; margin-top: 4px;
+        }
+
+        .controls {
+            display: flex; gap: 10px; align-items: center;
+            flex-wrap: wrap; justify-content: center;
+        }
+        .btn {
+            border: none; cursor: pointer;
+            font-family: var(--sans); font-weight: 700;
+            display: flex; align-items: center; gap: 6px;
+            transition: all 0.25s var(--ease);
+            outline: none; white-space: nowrap;
+        }
+        .btn:active { transform: scale(0.94); transition: 0.1s; }
+        .btn-main {
+            padding: 13px 28px; border-radius: 50px;
+            background: var(--a1); color: #fff;
+            font-size: 0.95rem;
+            box-shadow: 0 6px 24px var(--a1g);
+            min-width: 110px; justify-content: center;
+            position: relative; overflow: hidden;
+        }
+        .btn-main::after {
+            content: ''; position: absolute;
+            top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            transition: left 0.5s;
+        }
+        .btn-main:hover::after { left: 100%; }
+        .btn-main:hover { box-shadow: 0 8px 32px rgba(124,106,245,0.6); transform: translateY(-2px); }
+        .btn-main.running { background: var(--yellow); box-shadow: 0 6px 24px rgba(245,158,11,0.4); }
+        .btn-icon {
+            width: 44px; height: 44px; border-radius: 50%;
+            background: var(--card); border: 1px solid var(--card-border);
+            backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur));
+            color: var(--text); font-size: 1.2rem;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .btn-icon:hover { border-color: var(--card-border-hover); transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.3); }
+
+        .panel {
+            background: var(--card);
+            backdrop-filter: blur(var(--blur));
+            -webkit-backdrop-filter: blur(var(--blur));
+            border: 1px solid var(--card-border);
+            border-radius: var(--r2);
+            padding: 16px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+        }
+        .panel-title {
+            font-size: 0.7rem; font-weight: 900;
+            color: var(--text3); text-transform: uppercase;
+            letter-spacing: 2px; margin-bottom: 12px;
+        }
+
+        .time-row {
+            display: flex; gap: 8px;
+            align-items: center; flex-wrap: wrap;
+            justify-content: center;
+        }
+        .t-group {
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+        }
+        .t-input-wrap {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--card-border);
+            border-radius: var(--r3);
+            padding: 6px 10px;
+            display: flex; flex-direction: column; align-items: center;
+            transition: border-color 0.2s;
+        }
+        .t-input-wrap:focus-within { border-color: var(--a1); box-shadow: 0 0 0 2px var(--a1g); }
+        .t-input {
+            width: 52px; background: transparent; border: none;
+            color: var(--text); font-size: 1.2rem; font-weight: 700;
+            text-align: center; font-family: var(--mono);
+            outline: none; -moz-appearance: textfield;
+        }
+        .t-input::-webkit-outer-spin-button,
+        .t-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .t-lbl { font-size: 0.65rem; color: var(--text3); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .t-sep { font-size: 1.3rem; font-weight: 900; color: var(--text3); margin-top: -4px; }
+        .btn-sm {
+            padding: 8px 16px; border-radius: 25px;
+            background: var(--card); border: 1px solid var(--card-border);
+            backdrop-filter: blur(var(--blur)); -webkit-backdrop-filter: blur(var(--blur));
+            color: var(--text); font-size: 0.78rem;
+            display: flex; align-items: center; gap: 5px;
+        }
+        .btn-sm:hover { border-color: var(--card-border-hover); transform: translateY(-1px); }
+
+        .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+        .chip {
+            padding: 7px 14px; border-radius: 25px;
+            border: 1px solid var(--card-border);
+            background: transparent; color: var(--text2);
+            cursor: pointer; font-size: 0.78rem; font-weight: 600;
+            font-family: var(--sans);
+            transition: all 0.25s var(--ease);
+            outline: none; white-space: nowrap;
+        }
+        .chip:hover {
+            border-color: var(--a1); color: var(--a1);
+            background: rgba(124,106,245,0.08);
+            box-shadow: 0 2px 12px var(--a1g);
+            transform: translateY(-1px);
+        }
+        .chip:active { transform: scale(0.94); transition: 0.1s; }
+        .chip.saved {
+            border-color: var(--green); color: var(--green);
+            background: rgba(16,185,129,0.06);
+        }
+        .chip.saved:hover { box-shadow: 0 2px 12px rgba(16,185,129,0.3); border-color: var(--green); color: var(--green); }
+
+        .pomo-row {
+            display: flex; gap: 10px; align-items: flex-end;
+            flex-wrap: wrap; justify-content: center;
+        }
+        .pomo-cycle {
+            text-align: center; margin-top: 10px;
+            font-size: 0.82rem; color: var(--text2);
+        }
+        .pomo-cycle strong { color: var(--text); }
+        .cycle-dots {
+            display: flex; gap: 6px; justify-content: center; margin-top: 6px;
+        }
+        .cycle-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--card-border);
+            transition: background 0.3s, transform 0.3s;
+        }
+        .cycle-dot.done { background: var(--red); transform: scale(1.2); }
+
+        .history-wrap {
+            max-height: 200px; overflow-y: auto;
+            scroll-behavior: smooth;
+            scrollbar-width: thin; scrollbar-color: var(--card-border-hover) transparent;
+        }
+        .history-wrap::-webkit-scrollbar { width: 4px; }
+        .history-wrap::-webkit-scrollbar-thumb { background: var(--card-border-hover); border-radius: 10px; }
+        .h-item {
+            display: flex; justify-content: space-between;
+            align-items: center; padding: 9px 10px;
+            border-radius: var(--r4);
+            gap: 8px; font-size: 0.82rem;
+            transition: background 0.2s;
+        }
+        .h-item:hover { background: rgba(255,255,255,0.03); }
+        .h-time { font-family: var(--mono); font-weight: 700; color: var(--text); }
+        .h-tag {
+            padding: 2px 9px; border-radius: 15px; font-size: 0.68rem;
+            font-weight: 700; background: rgba(124,106,245,0.15); color: var(--a1);
+            white-space: nowrap;
+        }
+        .h-date { font-size: 0.7rem; color: var(--text3); }
+        .h-empty {
+            text-align: center; padding: 22px;
+            color: var(--text3); font-size: 0.82rem;
+        }
+
+        .lap-item {
+            display: flex; justify-content: space-between;
+            align-items: center; padding: 8px 10px;
+            border-radius: var(--r4); font-size: 0.8rem;
+            border-bottom: 1px solid var(--card-border);
+        }
+        .lap-item:last-child { border-bottom: none; }
+        .lap-num { color: var(--text3); font-size: 0.7rem; font-weight: 700; }
+        .lap-split { font-family: var(--mono); font-size: 0.85rem; color: var(--text); }
+        .lap-total { font-family: var(--mono); font-size: 0.78rem; color: var(--text2); }
+        .lap-best { color: var(--green) !important; }
+        .lap-worst { color: var(--red) !important; }
+        .laps-wrap { max-height: 180px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--card-border-hover) transparent; }
+        .laps-wrap::-webkit-scrollbar { width: 4px; }
+        .laps-wrap::-webkit-scrollbar-thumb { background: var(--card-border-hover); border-radius: 10px; }
+
+        .shortcuts-panel {
+            display: flex; flex-wrap: wrap; gap: 6px;
+            justify-content: center;
+        }
+        .sc {
+            padding: 4px 10px; border-radius: 6px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--card-border);
+            font-size: 0.7rem; color: var(--text3);
+            display: flex; align-items: center; gap: 5px;
+        }
+        .sc kbd {
+            background: rgba(255,255,255,0.08); border: 1px solid var(--card-border-hover);
+            border-radius: 4px; padding: 1px 6px;
+            font-family: var(--mono); font-size: 0.68rem; color: var(--text2);
+        }
+
+        .toast {
+            position: fixed; bottom: 32px; left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #1a1a2c; color: #fff;
+            padding: 11px 22px; border-radius: 50px;
+            font-weight: 700; font-size: 0.88rem;
+            z-index: 9999;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.12);
+            pointer-events: none;
+            transition: transform 0.4s var(--spring);
+            white-space: nowrap;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+
+        .hidden { display: none !important; }
+
+        :fullscreen .app, :-webkit-full-screen .app {
+            max-width: 600px; margin: auto;
+            padding-top: 40px;
+        }
+
+        @media (max-width: 460px) {
+            .ring-wrap { width: 200px; height: 200px; }
+            .time-txt { font-size: 2.6rem; letter-spacing: 1px; }
+            .tab { font-size: 0.78rem; padding: 9px 6px; }
+            .timer-card { padding: 22px 14px 18px; }
+        }
+        @media (max-width: 360px) {
+            .ring-wrap { width: 170px; height: 170px; }
+            .time-txt { font-size: 2.1rem; }
+            .ring-bg, .ring-fill { stroke-width: 7; }
+        }
+
+        @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+        .panel { animation: fadeIn 0.3s var(--ease); }
+        
+        /* Spotify player */
+        .spotify-player {
+            margin-top: 8px;
+            border-radius: var(--r3);
+            overflow: hidden;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<div class="app" id="app">
+
+    <header class="header">
+        <div class="brand">
+            <div class="brand-icon">⏱️</div>
+            <span class="brand-name">مؤقت برو</span>
+        </div>
+        <div class="hbtns">
+            <button class="hbtn" id="btnKb" title="اختصارات لوحة المفاتيح" aria-label="اختصارات">⌨️</button>
+            <button class="hbtn" id="btnFs" title="ملء الشاشة [F]" aria-label="ملء الشاشة">⛶</button>
+            <button class="hbtn" id="btnFloat" title="نافذة عائمة (Picture-in-Picture)" aria-label="نافذة عائمة">🖼️</button>
+            <button class="hbtn" id="btnTheme" title="تبديل السمة" aria-label="تبديل السمة">🌙</button>
+            <button class="hbtn hidden" id="btnInstall" title="تثبيت كتطبيق" aria-label="تثبيت">📲
+                <span class="install-badge" id="installBadge"></span>
+            </button>
+        </div>
+    </header>
+
+    <div class="install-banner hidden" id="installBanner">
+        <div class="install-banner-icon">📲</div>
+        <div class="install-banner-text">
+            <div class="install-banner-title">ثبّت مؤقت برو على جهازك</div>
+            <div class="install-banner-sub">استخدمه كتطبيق مستقل بدون متصفح</div>
+        </div>
+        <button class="install-banner-btn" id="bannerInstallBtn">تثبيت</button>
+        <button class="install-banner-close" id="bannerClose">✕</button>
+    </div>
+
+    <nav class="tabs" role="tablist">
+        <button class="tab active" data-mode="countdown" role="tab">⏳ تنازلي</button>
+        <button class="tab" data-mode="stopwatch" role="tab">⏱️ إيقاف</button>
+        <button class="tab" data-mode="pomodoro" role="tab">🍅 بومودورو</button>
+    </nav>
+
+    <div class="timer-card" id="timerCard">
+        <div class="ring-wrap" id="ringWrap">
+            <svg class="ring-svg" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <circle class="ring-bg" cx="120" cy="120" r="108"/>
+                <circle class="ring-fill" id="ringFill" cx="120" cy="120" r="108"
+                    stroke-dasharray="678.58" stroke-dashoffset="0"/>
+            </svg>
+            <div class="ring-dot" id="ringDot"></div>
+            <div class="ring-center">
+                <div class="time-txt" id="timeTxt" aria-live="polite" aria-label="الوقت">00:00</div>
+                <div class="time-lbl" id="timeLbl">دقيقة:ثانية</div>
+                <div class="ms-bar hidden" id="msBar">.00</div>
+                <div class="phase-tag hidden" id="phaseTag"></div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-main" id="btnMain" aria-label="بدء/إيقاف">▶️ بدء</button>
+            <button class="btn btn-icon" id="btnReset" title="إعادة تعيين [R]" aria-label="إعادة تعيين">↺</button>
+            <button class="btn btn-icon hidden" id="btnLap" title="تسجيل لفة [L]" aria-label="لفة">🏁</button>
+        </div>
+    </div>
+
+    <div class="panel" id="pnlCustom">
+        <div class="panel-title">⚙️ تخصيص الوقت</div>
+        <div class="time-row">
+            <div class="t-group">
+                <div class="t-input-wrap">
+                    <input class="t-input" id="iH" type="number" min="0" max="99" value="0" aria-label="ساعات">
+                    <span class="t-lbl">ساعة</span>
+                </div>
+            </div>
+            <span class="t-sep">:</span>
+            <div class="t-group">
+                <div class="t-input-wrap">
+                    <input class="t-input" id="iM" type="number" min="0" max="59" value="5" aria-label="دقائق">
+                    <span class="t-lbl">دقيقة</span>
+                </div>
+            </div>
+            <span class="t-sep">:</span>
+            <div class="t-group">
+                <div class="t-input-wrap">
+                    <input class="t-input" id="iS" type="number" min="0" max="59" value="0" aria-label="ثواني">
+                    <span class="t-lbl">ثانية</span>
+                </div>
+            </div>
+            <button class="btn btn-sm" id="btnApply">✅ تطبيق</button>
+            <button class="btn btn-sm" id="btnSave">💾 حفظ</button>
+        </div>
+    </div>
+
+    <div class="panel" id="pnlPresets">
+        <div class="panel-title">📋 إعدادات مسبقة</div>
+        <div class="chips" id="chipsWrap">
+            <button class="chip" data-s="60">١ دقيقة</button>
+            <button class="chip" data-s="180">٣ دقائق</button>
+            <button class="chip" data-s="300">٥ دقائق</button>
+            <button class="chip" data-s="600">١٠ دقائق</button>
+            <button class="chip" data-s="900">١٥ دقيقة</button>
+            <button class="chip" data-s="1800">٣٠ دقيقة</button>
+            <button class="chip" data-s="3600">ساعة</button>
+        </div>
+    </div>
+
+    <div class="panel hidden" id="pnlPomo">
+        <div class="panel-title">🍅 إعدادات البومودورو</div>
+        <div class="pomo-row">
+            <div class="t-group">
+                <div class="t-input-wrap">
+                    <input class="t-input" id="pW" type="number" min="1" max="120" value="25" aria-label="دقائق العمل">
+                    <span class="t-lbl">عمل</span>
+                </div>
+            </div>
+            <div class="t-group">
+                <div class="t-input-wrap">
+                    <input class="t-input" id="pB" type="number" min="1" max="60" value="5" aria-label="دقائق الراحة">
+                    <span class="t-lbl">راحة</span>
+                </div>
+            </div>
+            <div class="t-group">
+                <div class="t-input-wrap">
+                    <input class="t-input" id="pC" type="number" min="1" max="8" value="4" aria-label="عدد الجولات">
+                    <span class="t-lbl">جولات</span>
+                </div>
+            </div>
+            <button class="btn btn-sm" id="btnPomoApply">✅ تطبيق</button>
+        </div>
+        <div class="pomo-cycle">
+            الجولة: <strong id="pomoCur">1</strong> / <span id="pomoMax">4</span>
+            <div class="cycle-dots" id="cycleDots"></div>
+        </div>
+    </div>
+
+    <div class="panel hidden" id="pnlLaps">
+        <div class="panel-title">🏁 اللفات</div>
+        <div class="laps-wrap" id="lapsWrap">
+            <div class="h-empty">لم يتم تسجيل لفات بعد</div>
+        </div>
+    </div>
+
+    <!-- 🎵 Music Panel -->
+    <div class="panel" id="pnlMusic">
+        <div class="panel-title">🎵 موسيقى خلفية</div>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div>
+                <label style="font-size:0.8rem; margin-bottom:4px; display:block;">🎧 اختر ملف صوتي من جهازك:</label>
+                <input type="file" id="musicFileInput" accept="audio/*" style="display:block; width:100%;">
+                <div style="display:flex; gap:6px; margin-top:6px;">
+                    <button class="btn btn-sm" id="btnMusicPlay" disabled>▶️ تشغيل</button>
+                    <button class="btn btn-sm" id="btnMusicStop" disabled>⏹️ إيقاف</button>
+                    <button class="btn btn-sm" id="btnMusicToggleLoop" disabled>🔁 تكرار: تشغيل</button>
+                </div>
+            </div>
+            <hr style="border-color:var(--card-border); margin:4px 0;">
+            <div>
+                <label style="font-size:0.8rem; margin-bottom:4px; display:block;">🎵 رابط Spotify (مقطع/قائمة):</label>
+                <div style="display:flex; gap:6px;">
+                    <input type="text" id="spotifyUrl" placeholder="https://open.spotify.com/track/..." style="flex:1; background:transparent; border:1px solid var(--card-border); border-radius:20px; padding:6px 12px; color:var(--text); font-family:var(--sans);">
+                    <button class="btn btn-sm" id="btnSpotifyLoad">تحميل</button>
+                </div>
+                <div id="spotifyPlayer" class="spotify-player"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel" id="pnlHistory">
+        <div class="panel-title" style="display:flex;justify-content:space-between;align-items:center;">
+            <span>📜 السجل</span>
+            <button class="btn btn-sm" id="btnClearHistory" style="padding:4px 10px;font-size:0.68rem;" title="مسح السجل">🗑️ مسح</button>
+        </div>
+        <div class="history-wrap" id="historyWrap">
+            <div class="h-empty">لا يوجد سجل بعد. ابدأ باستخدام المؤقت!</div>
+        </div>
+    </div>
+
+    <div class="panel hidden" id="pnlKb">
+        <div class="panel-title">⌨️ اختصارات لوحة المفاتيح</div>
+        <div class="shortcuts-panel">
+            <div class="sc"><kbd>Space</kbd> بدء/إيقاف</div>
+            <div class="sc"><kbd>R</kbd> إعادة تعيين</div>
+            <div class="sc"><kbd>L</kbd> لفة</div>
+            <div class="sc"><kbd>F</kbd> ملء الشاشة</div>
+            <div class="sc"><kbd>1</kbd> تنازلي</div>
+            <div class="sc"><kbd>2</kbd> ساعة إيقاف</div>
+            <div class="sc"><kbd>3</kbd> بومودورو</div>
+            <div class="sc"><kbd>M</kbd> كتم الصوت</div>
+        </div>
+    </div>
+
+</div>
+
+<div class="toast" id="toast" role="alert" aria-live="assertive"></div>
+
+<!-- Hidden audio element for background music -->
+<audio id="bgAudio" loop style="display:none;"></audio>
+
+<script>
+(function() {
+'use strict';
+
+// ============ CANVAS BG ============
+const canvas = document.getElementById('bgCanvas');
+const ctx2d = canvas.getContext('2d');
+let particles = [];
+
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+class Particle {
+    constructor() { this.reset(); this.y = Math.random() * window.innerHeight; }
+    reset() {
+        this.x = Math.random() * window.innerWidth;
+        this.y = window.innerHeight + 10;
+        this.vy = -(0.3 + Math.random() * 0.6);
+        this.r = 1 + Math.random() * 2.5;
+        this.life = 0; this.maxLife = 180 + Math.random() * 200;
+        const hues = [260, 195, 340, 160];
+        const h = hues[Math.floor(Math.random() * hues.length)];
+        this.color = `hsla(${h},70%,65%,`;
+    }
+    tick() {
+        this.y += this.vy; this.life++;
+        if (this.life > this.maxLife) this.reset();
+    }
+    draw() {
+        const a = Math.sin((this.life / this.maxLife) * Math.PI) * 0.5;
+        ctx2d.beginPath();
+        ctx2d.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+        ctx2d.fillStyle = this.color + a + ')';
+        ctx2d.fill();
+    }
+}
+
+for (let i = 0; i < 30; i++) particles.push(new Particle());
+
+function animBg() {
+    ctx2d.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => { p.tick(); p.draw(); });
+    requestAnimationFrame(animBg);
+}
+animBg();
+
+// ============ DOM ============
+const timeTxt = document.getElementById('timeTxt');
+const timeLbl = document.getElementById('timeLbl');
+const msBar   = document.getElementById('msBar');
+const phaseTag= document.getElementById('phaseTag');
+const ringFill= document.getElementById('ringFill');
+const ringDot = document.getElementById('ringDot');
+const ringWrap= document.getElementById('ringWrap');
+const timerCard=document.getElementById('timerCard');
+const btnMain = document.getElementById('btnMain');
+const btnReset= document.getElementById('btnReset');
+const btnLap  = document.getElementById('btnLap');
+const btnFs   = document.getElementById('btnFs');
+const btnFloat= document.getElementById('btnFloat');
+const btnTheme= document.getElementById('btnTheme');
+const btnInstall=document.getElementById('btnInstall');
+const installBadge=document.getElementById('installBadge');
+const installBanner=document.getElementById('installBanner');
+const bannerInstallBtn=document.getElementById('bannerInstallBtn');
+const bannerClose=document.getElementById('bannerClose');
+const btnKb   = document.getElementById('btnKb');
+const pnlKb   = document.getElementById('pnlKb');
+const modeTabs= document.querySelectorAll('.tab');
+const pnlCustom=document.getElementById('pnlCustom');
+const pnlPresets=document.getElementById('pnlPresets');
+const pnlPomo =document.getElementById('pnlPomo');
+const pnlLaps =document.getElementById('pnlLaps');
+const pnlHistory=document.getElementById('pnlHistory');
+const chipsWrap=document.getElementById('chipsWrap');
+const historyWrap=document.getElementById('historyWrap');
+const lapsWrap= document.getElementById('lapsWrap');
+const iH = document.getElementById('iH');
+const iM = document.getElementById('iM');
+const iS = document.getElementById('iS');
+const btnApply=document.getElementById('btnApply');
+const btnSave =document.getElementById('btnSave');
+const pW = document.getElementById('pW');
+const pB = document.getElementById('pB');
+const pC = document.getElementById('pC');
+const btnPomoApply=document.getElementById('btnPomoApply');
+const pomoCur =document.getElementById('pomoCur');
+const pomoMax =document.getElementById('pomoMax');
+const cycleDots=document.getElementById('cycleDots');
+const btnClearHistory=document.getElementById('btnClearHistory');
+const toastEl = document.getElementById('toast');
+
+// Music elements
+const bgAudio = document.getElementById('bgAudio');
+const musicFileInput = document.getElementById('musicFileInput');
+const btnMusicPlay = document.getElementById('btnMusicPlay');
+const btnMusicStop = document.getElementById('btnMusicStop');
+const btnMusicToggleLoop = document.getElementById('btnMusicToggleLoop');
+const spotifyUrlInput = document.getElementById('spotifyUrl');
+const btnSpotifyLoad = document.getElementById('btnSpotifyLoad');
+const spotifyPlayer = document.getElementById('spotifyPlayer');
+
+// ============ STATE ============
+const CIRCUM = 678.58;
+let mode = 'countdown';
+let state = 'idle';
+let totalSecs = 300;
+let remSecs = 300;
+let swMs = 0;
+let swStart = 0;
+let swElapsed = 0;
+let pomWork = 25;
+let pomBreak = 5;
+let pomMaxCycles = 4;
+let pomCycle = 1;
+let pomIsWork = true;
+let rafId = null;
+let lastTick = 0;
+let laps = [];
+let history = [];
+let savedPresets = [];
+let deferredPrompt = null;
+let isMuted = false;
+let audioCtx = null;
+let bgInterval = null;
+let pipWindow = null;
+
+// ============ STORAGE ============
+function save() {
+    try {
+        localStorage.setItem('tmp', JSON.stringify({
+            theme: document.body.classList.contains('light') ? 'light' : 'dark',
+            savedPresets, history: history.slice(0, 40),
+            pomWork, pomBreak, pomMaxCycles,
+            pomCycle, pomIsWork, mode,
+            totalSecs,
+            remSecs: mode === 'countdown' ? remSecs : totalSecs,
+            swElapsed: mode === 'stopwatch' ? swElapsed : 0,
+            isMuted
+        }));
+    } catch(e) {}
+}
+
+function load() {
+    try {
+        const d = JSON.parse(localStorage.getItem('tmp') || '{}');
+        if (d.theme) document.body.classList.toggle('light', d.theme === 'light');
+        if (d.savedPresets) savedPresets = d.savedPresets;
+        if (d.history) history = d.history.slice(0, 40);
+        if (d.pomWork) pomWork = d.pomWork;
+        if (d.pomBreak) pomBreak = d.pomBreak;
+        if (d.pomMaxCycles) pomMaxCycles = d.pomMaxCycles;
+        if (d.pomCycle) pomCycle = d.pomCycle;
+        if (d.pomIsWork !== undefined) pomIsWork = d.pomIsWork;
+        if (d.mode) mode = d.mode;
+        if (d.totalSecs) totalSecs = d.totalSecs;
+        if (d.remSecs && mode === 'countdown') remSecs = d.remSecs;
+        if (d.swElapsed && mode === 'stopwatch') { swElapsed = d.swElapsed; swMs = swElapsed; }
+        if (d.isMuted) isMuted = d.isMuted;
+        pW.value = pomWork; pB.value = pomBreak; pC.value = pomMaxCycles;
+        applyTheme();
+    } catch(e) {}
+}
+
+// ============ AUDIO ============
+function getAudio() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    return audioCtx;
+}
+
+function playSound(type) {
+    if (isMuted) return;
+    try {
+        const ac = getAudio();
+        const t = ac.currentTime;
+        if (type === 'chime') {
+            [523.25, 659.25, 783.99].forEach((f, i) => {
+                const o = ac.createOscillator(); o.type = 'sine';
+                o.frequency.value = f;
+                const g = ac.createGain();
+                g.gain.setValueAtTime(0.28, t + i * 0.2);
+                g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.2 + 0.7);
+                o.connect(g); g.connect(ac.destination);
+                o.start(t + i * 0.2); o.stop(t + i * 0.2 + 0.8);
+            });
+        } else if (type === 'alarm') {
+            for (let i = 0; i < 6; i++) {
+                const o = ac.createOscillator(); o.type = 'square'; o.frequency.value = 880;
+                const g = ac.createGain();
+                g.gain.setValueAtTime(0.18, t + i * 0.25);
+                g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.25 + 0.2);
+                o.connect(g); g.connect(ac.destination);
+                o.start(t + i * 0.25); o.stop(t + i * 0.25 + 0.22);
+            }
+        } else if (type === 'bell') {
+            const o = ac.createOscillator(); o.type = 'triangle';
+            o.frequency.setValueAtTime(440, t);
+            o.frequency.exponentialRampToValueAtTime(220, t + 1.2);
+            const g = ac.createGain();
+            g.gain.setValueAtTime(0.38, t);
+            g.gain.exponentialRampToValueAtTime(0.001, t + 1.4);
+            o.connect(g); g.connect(ac.destination);
+            o.start(t); o.stop(t + 1.5);
+        } else if (type === 'tick') {
+            const o = ac.createOscillator(); o.type = 'sine'; o.frequency.value = 1100;
+            const g = ac.createGain();
+            g.gain.setValueAtTime(0.06, t);
+            g.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+            o.connect(g); g.connect(ac.destination);
+            o.start(t); o.stop(t + 0.06);
+        }
+    } catch(e) {}
+}
+
+// ============ NOTIFICATIONS ============
+function notify(title, body) {
+    if ('Notification' in window) {
+        if (Notification.permission === 'granted') {
+            try { new Notification(title, { body, silent: false }); } catch(e) {}
+        } else if (Notification.permission === 'default') {
+            Notification.requestPermission().then(p => {
+                if (p === 'granted') {
+                    try { new Notification(title, { body, silent: false }); } catch(e) {}
+                }
+            });
+        }
+    }
+}
+
+// ============ DISPLAY ============
+function fmtTime(ms, showMs = false) {
+    const totalS = Math.floor(ms / 1000);
+    const h = Math.floor(totalS / 3600);
+    const m = Math.floor((totalS % 3600) / 60);
+    const s = totalS % 60;
+    const msDigits = Math.floor((ms % 1000) / 10);
+    const main = h > 0
+        ? `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
+        : `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    return { main, ms: `.${String(msDigits).padStart(2,'0')}`, hasHours: h > 0 };
+}
+
+function fmtSecs(secs) {
+    const h = Math.floor(secs / 3600);
+    const m = Math.floor((secs % 3600) / 60);
+    const s = secs % 60;
+    const parts = [];
+    if (h) parts.push(h + ' ساعة');
+    if (m) parts.push(m + ' دقيقة');
+    if (s || !parts.length) parts.push(s + ' ثانية');
+    return parts.join(' و ');
+}
+
+function updateDisplay() {
+    let ms;
+    if (mode === 'stopwatch') {
+        ms = state === 'running'
+            ? swElapsed + (performance.now() - swStart)
+            : swElapsed;
+    } else {
+        ms = Math.max(0, remSecs * 1000);
+    }
+    ms = Math.max(0, ms);
+    const f = fmtTime(ms, mode === 'stopwatch');
+    timeTxt.textContent = f.main;
+    timeLbl.textContent = f.hasHours ? 'ساعة:دقيقة:ثانية' : 'دقيقة:ثانية';
+
+    if (mode === 'stopwatch') {
+        msBar.textContent = f.ms;
+        msBar.classList.remove('hidden');
+    } else {
+        msBar.classList.add('hidden');
+    }
+
+    if (mode === 'pomodoro') {
+        phaseTag.classList.remove('hidden');
+        phaseTag.textContent = pomIsWork ? '🔴 وقت العمل' : '🟢 استراحة';
+        phaseTag.style.color = pomIsWork ? 'var(--red)' : 'var(--green)';
+        pomoCur.textContent = pomCycle;
+        pomoMax.textContent = pomMaxCycles;
+        renderCycleDots();
+    } else {
+        phaseTag.classList.add('hidden');
+    }
+
+    // Send state to PiP window if open
+    if (pipWindow && !pipWindow.closed) {
+        try {
+            pipWindow.postMessage({
+                type: 'timerState',
+                text: timeTxt.textContent,
+                label: timeLbl.textContent,
+                msBar: msBar.textContent,
+                phase: phaseTag.textContent,
+                mode, state
+            }, '*');
+        } catch(e) {}
+    }
+}
+
+function updateRing() {
+    let frac;
+    if (mode === 'stopwatch') {
+        const cur = state === 'running'
+            ? swElapsed + (performance.now() - swStart)
+            : swElapsed;
+        frac = Math.min(1, cur / 3600000);
+        ringFill.classList.add('m-stop'); ringFill.classList.remove('m-pomo');
+        ringDot.style.background = 'var(--green)';
+        ringDot.style.boxShadow = '0 0 16px rgba(16,185,129,0.5)';
+    } else if (mode === 'pomodoro') {
+        const tot = (pomIsWork ? pomWork : pomBreak) * 60;
+        frac = tot > 0 ? Math.max(0, remSecs / tot) : 0;
+        ringFill.classList.add('m-pomo'); ringFill.classList.remove('m-stop');
+        ringDot.style.background = 'var(--red)';
+        ringDot.style.boxShadow = '0 0 16px rgba(244,63,94,0.5)';
+    } else {
+        frac = totalSecs > 0 ? Math.max(0, remSecs / totalSecs) : 0;
+        ringFill.classList.remove('m-stop', 'm-pomo');
+        ringDot.style.background = 'var(--a2)';
+        ringDot.style.boxShadow = '0 0 16px var(--a2g)';
+    }
+    frac = Math.max(0, Math.min(1, frac));
+    ringFill.style.strokeDashoffset = CIRCUM * (1 - frac);
+
+    const ang = frac * 2 * Math.PI - Math.PI / 2;
+    const R = 108, cx = 120, cy = 120;
+    const dx = cx + R * Math.cos(ang);
+    const dy = cy + R * Math.sin(ang);
+    ringDot.style.left = (dx / 240 * 100) + '%';
+    ringDot.style.top  = (dy / 240 * 100) + '%';
+}
+
+function renderCycleDots() {
+    cycleDots.innerHTML = '';
+    for (let i = 0; i < pomMaxCycles; i++) {
+        const d = document.createElement('div');
+        d.className = 'cycle-dot' + (i < pomCycle - (pomIsWork ? 0 : 1) ? ' done' : '');
+        cycleDots.appendChild(d);
+    }
+}
+
+// ============ BACKGROUND TIMER ============
+function startBgTimer() {
+    if (bgInterval) clearInterval(bgInterval);
+    bgInterval = setInterval(updateBackgroundTime, 500);
+}
+
+function updateBackgroundTime() {
+    if (state !== 'running') return;
+    const now = performance.now();
+    if (mode === 'stopwatch') {
+        swElapsed += now - swStart;
+        swStart = now;
+        updateDisplay();
+        updateRing();
+    } else {
+        const elapsed = (now - lastTick) / 1000;
+        lastTick = now;
+        remSecs = Math.max(0, remSecs - elapsed);
+        updateDisplay();
+        updateRing();
+        if (remSecs <= 0) {
+            timerDone();
+        }
+    }
+}
+
+// ============ TIMER LOGIC ============
+function tick(now) {
+    if (state !== 'running') return;
+    if (mode === 'stopwatch') {
+        updateDisplay(); updateRing();
+    } else {
+        const elapsed = (now - lastTick) / 1000;
+        lastTick = now;
+        remSecs = Math.max(0, remSecs - elapsed);
+        updateDisplay(); updateRing();
+        if (remSecs <= 3 && remSecs > 0) playSound('tick');
+        if (remSecs <= 0) { timerDone(); return; }
+    }
+    rafId = requestAnimationFrame(tick);
+}
+
+function startTimer() {
+    if (state === 'running') return;
+    if (mode === 'countdown' && remSecs <= 0) remSecs = totalSecs;
+    if (mode === 'pomodoro' && remSecs <= 0) {
+        remSecs = (pomIsWork ? pomWork : pomBreak) * 60;
+    }
+    state = 'running';
+    lastTick = performance.now();
+    if (mode === 'stopwatch') {
+        swStart = performance.now();
+    }
+    if (bgInterval) { clearInterval(bgInterval); bgInterval = null; }
+    rafId = requestAnimationFrame(tick);
+    updateBtn();
+    save();
+}
+
+function pauseTimer() {
+    if (state !== 'running') return;
+    state = 'paused';
+    if (rafId) cancelAnimationFrame(rafId); rafId = null;
+    if (bgInterval) { clearInterval(bgInterval); bgInterval = null; }
+    if (mode === 'stopwatch') {
+        swElapsed += performance.now() - swStart;
+    }
+    updateBtn();
+    save();
+}
+
+function resetTimer() {
+    if (rafId) cancelAnimationFrame(rafId); rafId = null;
+    if (bgInterval) { clearInterval(bgInterval); bgInterval = null; }
+    state = 'idle';
+    if (mode === 'stopwatch') {
+        swElapsed = 0; swMs = 0; laps = [];
+        renderLaps();
+    } else if (mode === 'pomodoro') {
+        remSecs = pomWork * 60;
+        totalSecs = remSecs;
+        pomIsWork = true; pomCycle = 1;
+    } else {
+        remSecs = totalSecs;
+    }
+    updateDisplay(); updateRing(); updateBtn(); updateUI();
+    save();
+}
+
+function timerDone() {
+    if (rafId) cancelAnimationFrame(rafId); rafId = null;
+    if (bgInterval) { clearInterval(bgInterval); bgInterval = null; }
+    state = 'idle';
+    remSecs = 0;
+    updateDisplay(); updateRing();
+
+    const lbl = mode === 'pomodoro'
+        ? (pomIsWork ? 'بومودورو - عمل' : 'بومودورو - استراحة')
+        : 'مؤقت تنازلي';
+
+    addHistory(lbl, timeTxt.textContent);
+    playSound(mode === 'pomodoro' ? 'bell' : 'chime');
+    notify('⏰ انتهى المؤقت!', lbl);
+    showToast('✅ انتهى الوقت!', '⏰');
+
+    timerCard.classList.add('pulse');
+    setTimeout(() => timerCard.classList.remove('pulse'), 2000);
+
+    if (mode === 'pomodoro') {
+        if (pomIsWork) {
+            pomIsWork = false;
+            remSecs = pomBreak * 60;
+            totalSecs = remSecs;
+            showToast('☕ وقت الاستراحة!', '🟢');
+        } else {
+            pomCycle++;
+            if (pomCycle > pomMaxCycles) {
+                pomCycle = 1;
+                showToast('🎉 اكتملت جميع الجولات!', '🏆');
+                playSound('alarm');
+            }
+            pomIsWork = true;
+            remSecs = pomWork * 60;
+            totalSecs = remSecs;
+            showToast('🔴 جولة جديدة: ' + pomCycle, '🍅');
+        }
+        updateDisplay(); updateRing(); updateUI();
+    }
+    updateBtn();
+    save();
+}
+
+function updateBtn() {
+    btnMain.classList.remove('running');
+    if (state === 'running') {
+        btnMain.innerHTML = '⏸️ إيقاف مؤقت';
+        btnMain.classList.add('running');
+    } else if (state === 'paused') {
+        btnMain.innerHTML = '▶️ استئناف';
+    } else {
+        btnMain.innerHTML = '▶️ بدء';
+    }
+}
+
+function updateUI() {
+    modeTabs.forEach(t => t.classList.toggle('active', t.dataset.mode === mode));
+    pnlCustom.classList.toggle('hidden', mode !== 'countdown');
+    pnlPresets.classList.toggle('hidden', mode !== 'countdown');
+    pnlPomo.classList.toggle('hidden', mode !== 'pomodoro');
+    pnlLaps.classList.toggle('hidden', mode !== 'stopwatch');
+    btnLap.classList.toggle('hidden', mode !== 'stopwatch');
+    ringFill.classList.remove('m-stop', 'm-pomo');
+    if (mode === 'pomodoro') ringFill.classList.add('m-pomo');
+    if (mode === 'stopwatch') ringFill.classList.add('m-stop');
+    updateDisplay(); updateRing(); updateBtn();
+}
+
+function switchMode(m) {
+    if (state === 'running') {
+        if (!confirm('المؤقت يعمل. هل تريد تبديل الوضع؟')) return;
+    }
+    if (rafId) cancelAnimationFrame(rafId); rafId = null;
+    if (bgInterval) { clearInterval(bgInterval); bgInterval = null; }
+    state = 'idle';
+    mode = m;
+    if (m === 'stopwatch') { swElapsed = 0; laps = []; renderLaps(); }
+    else if (m === 'pomodoro') { remSecs = pomWork * 60; totalSecs = remSecs; pomIsWork = true; pomCycle = 1; }
+    else { remSecs = totalSecs; }
+    updateUI(); save();
+}
+
+// ============ PRESETS ============
+function applyPreset(secs) {
+    if (state === 'running') { pauseTimer(); state = 'idle'; }
+    if (rafId) cancelAnimationFrame(rafId); rafId = null;
+    if (bgInterval) { clearInterval(bgInterval); bgInterval = null; }
+    totalSecs = secs; remSecs = secs;
+    if (mode !== 'countdown') { mode = 'countdown'; }
+    updateUI(); updateDisplay(); updateRing(); updateBtn();
+    showToast('✅ ' + fmtSecs(secs), '⏱️');
+    save();
+}
+
+function savePreset() {
+    const h = parseInt(iH.value)||0, m = parseInt(iM.value)||0, s = parseInt(iS.value)||0;
+    const tot = h*3600+m*60+s;
+    if (tot <= 0) { showToast('⚠️ أدخل وقتاً صحيحاً', ''); return; }
+    if (savedPresets.some(p => p.s === tot)) { showToast('⚠️ محفوظ مسبقاً', ''); return; }
+    savedPresets.push({ s: tot, l: fmtSecs(tot) });
+    if (savedPresets.length > 12) savedPresets.shift();
+    renderPresets(); save();
+    showToast('💾 تم الحفظ: ' + fmtSecs(tot), '');
+}
+
+function deletePreset(idx) {
+    savedPresets.splice(idx, 1);
+    renderPresets(); save();
+    showToast('🗑️ تم الحذف', '');
+}
+
+function renderPresets() {
+    const existing = chipsWrap.querySelectorAll('.chip.saved');
+    existing.forEach(e => e.remove());
+    savedPresets.forEach((p, i) => {
+        const c = document.createElement('button');
+        c.className = 'chip saved';
+        c.dataset.s = p.s;
+        c.textContent = p.l;
+        c.title = 'انقر للاستخدام | نقر مزدوج للحذف';
+        c.addEventListener('click', () => applyPreset(p.s));
+        c.addEventListener('dblclick', e => { e.stopPropagation(); deletePreset(i); });
+        c.addEventListener('contextmenu', e => { e.preventDefault(); deletePreset(i); });
+        chipsWrap.appendChild(c);
+    });
+}
+
+// ============ LAPS ============
+function addLap() {
+    if (mode !== 'stopwatch' || state !== 'running') return;
+    const cur = swElapsed + (performance.now() - swStart);
+    const prev = laps.length ? laps[laps.length-1].total : 0;
+    const split = cur - prev;
+    laps.push({ total: cur, split });
+    renderLaps();
+    showToast('🏁 لفة ' + laps.length + ': ' + fmtTime(split).main, '');
+    playSound('tick');
+    save();
+}
+
+function renderLaps() {
+    if (!laps.length) {
+        lapsWrap.innerHTML = '<div class="h-empty">لم يتم تسجيل لفات بعد</div>';
+        return;
+    }
+    const splits = laps.map(l => l.split);
+    const best = Math.min(...splits);
+    const worst = Math.max(...splits);
+    lapsWrap.innerHTML = [...laps].reverse().map((l, ri) => {
+        const i = laps.length - 1 - ri;
+        const isBest = laps.length > 1 && l.split === best;
+        const isWorst = laps.length > 1 && l.split === worst;
+        const cls = isBest ? 'lap-best' : isWorst ? 'lap-worst' : '';
+        return `<div class="lap-item">
+            <span class="lap-num">لفة ${i+1}</span>
+            <span class="lap-split ${cls}">${fmtTime(l.split).main}</span>
+            <span class="lap-total">${fmtTime(l.total).main}</span>
+        </div>`;
+    }).join('');
+    pnlLaps.classList.remove('hidden');
+}
+
+// ============ HISTORY ============
+function addHistory(type, time) {
+    history.unshift({
+        type, time,
+        date: new Date().toLocaleString('ar-SA', { hour:'2-digit', minute:'2-digit', day:'numeric', month:'short' }),
+        ts: Date.now()
+    });
+    if (history.length > 40) history.pop();
+    renderHistory(); save();
+}
+
+function renderHistory() {
+    if (!history.length) {
+        historyWrap.innerHTML = '<div class="h-empty">لا يوجد سجل بعد. ابدأ باستخدام المؤقت!</div>';
+        return;
+    }
+    historyWrap.innerHTML = history.map(h => `
+        <div class="h-item">
+            <span class="h-time">${h.time}</span>
+            <span class="h-tag">${h.type}</span>
+            <span class="h-date">${h.date}</span>
+        </div>
+    `).join('');
+}
+
+// ============ TOAST ============
+let toastTimer = null;
+function showToast(msg, icon='') {
+    if (toastTimer) clearTimeout(toastTimer);
+    toastEl.innerHTML = (icon ? `<span>${icon}</span>` : '') + `<span>${msg}</span>`;
+    toastEl.classList.add('show');
+    toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2400);
+}
+
+// ============ THEME ============
+function applyTheme() {
+    const isLight = document.body.classList.contains('light');
+    btnTheme.textContent = isLight ? '☀️' : '🌙';
+    btnTheme.title = isLight ? 'الوضع الداكن' : 'الوضع الفاتح';
+}
+
+// ============ FULLSCREEN ============
+function toggleFs() {
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        const el = document.documentElement;
+        (el.requestFullscreen || el.webkitRequestFullscreen).call(el);
+        btnFs.classList.add('on');
+    } else {
+        (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+        btnFs.classList.remove('on');
+    }
+}
+document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement) btnFs.classList.remove('on');
+});
+document.addEventListener('webkitfullscreenchange', () => {
+    if (!document.webkitFullscreenElement) btnFs.classList.remove('on');
+});
+
+// ============ PICTURE IN PICTURE ============
+async function togglePiP() {
+    if (pipWindow && !pipWindow.closed) {
+        pipWindow.close();
+        return;
+    }
+    if (!('documentPictureInPicture' in window)) {
+        showToast('❌ متصفحك لا يدعم النافذة العائمة. جرب Chrome.', '');
+        return;
+    }
+    try {
+        pipWindow = await documentPictureInPicture.requestWindow({ width: 320, height: 220 });
+        pipWindow.document.body.innerHTML = `
+            <style>
+                body { font-family: 'JetBrains Mono', monospace; background: #0a0a14; color: #eeeef8; margin:0; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; user-select:none; }
+                .time { font-size: 2.5rem; font-weight:700; }
+                .label { font-size:0.8rem; color:#9898b0; }
+                .btns { display:flex; gap:8px; margin-top:12px; }
+                button { background:#7c6af5; border:none; color:white; padding:8px 16px; border-radius:20px; cursor:pointer; font-weight:700; }
+            </style>
+            <div class="time" id="pipTime">00:00</div>
+            <div class="label" id="pipLabel">دقيقة:ثانية</div>
+            <div class="btns">
+                <button id="pipPlay">▶️</button>
+                <button id="pipReset">↺</button>
+            </div>
+        `;
+        const pipDoc = pipWindow.document;
+        pipDoc.getElementById('pipPlay').addEventListener('click', () => window.opener.postMessage({action:'togglePlay'}, '*'));
+        pipDoc.getElementById('pipReset').addEventListener('click', () => window.opener.postMessage({action:'reset'}, '*'));
+        
+        pipWindow.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'timerState') {
+                pipDoc.getElementById('pipTime').textContent = event.data.text;
+                pipDoc.getElementById('pipLabel').textContent = event.data.label;
+            }
+        });
+        pipWindow.addEventListener('pagehide', () => { pipWindow = null; });
+        // Send initial state
+        updateDisplay();
+    } catch (e) {
+        showToast('❌ تعذر فتح النافذة العائمة', '');
+    }
+}
+
+window.addEventListener('message', (event) => {
+    if (event.data && event.data.action === 'togglePlay') {
+        btnMain.click();
+    } else if (event.data && event.data.action === 'reset') {
+        resetTimer();
+    }
+});
+
+// ============ MUSIC CONTROLS ============
+musicFileInput.addEventListener('change', () => {
+    const file = musicFileInput.files[0];
+    if (file) {
+        const url = URL.createObjectURL(file);
+        bgAudio.src = url;
+        bgAudio.load();
+        btnMusicPlay.disabled = false;
+        btnMusicStop.disabled = false;
+        btnMusicToggleLoop.disabled = false;
+        btnMusicToggleLoop.textContent = '🔁 تكرار: تشغيل';
+        bgAudio.loop = true;
+    }
+});
+
+btnMusicPlay.addEventListener('click', () => {
+    if (bgAudio.src) {
+        bgAudio.play().catch(() => showToast('⚠️ تعذر التشغيل (تفاعل المستخدم مطلوب)', ''));
+    }
+});
+
+btnMusicStop.addEventListener('click', () => {
+    bgAudio.pause();
+    bgAudio.currentTime = 0;
+});
+
+btnMusicToggleLoop.addEventListener('click', () => {
+    bgAudio.loop = !bgAudio.loop;
+    btnMusicToggleLoop.textContent = bgAudio.loop ? '🔁 تكرار: تشغيل' : '🔁 تكرار: إيقاف';
+});
+
+btnSpotifyLoad.addEventListener('click', () => {
+    let url = spotifyUrlInput.value.trim();
+    if (!url) { showToast('⚠️ أدخل رابط Spotify', ''); return; }
+    // Convert to embed URL
+    let embedUrl = '';
+    if (url.includes('open.spotify.com/track/')) {
+        const trackId = url.split('track/')[1].split('?')[0];
+        embedUrl = `https://open.spotify.com/embed/track/${trackId}?utm_source=generator&autoplay=1`;
+    } else if (url.includes('open.spotify.com/playlist/')) {
+        const playlistId = url.split('playlist/')[1].split('?')[0];
+        embedUrl = `https://open.spotify.com/embed/playlist/${playlistId}?utm_source=generator&autoplay=1`;
+    } else if (url.includes('open.spotify.com/album/')) {
+        const albumId = url.split('album/')[1].split('?')[0];
+        embedUrl = `https://open.spotify.com/embed/album/${albumId}?utm_source=generator&autoplay=1`;
+    } else {
+        showToast('⚠️ الرابط غير مدعوم. استخدم رابط مقطع/قائمة/ألبوم.', '');
+        return;
+    }
+    spotifyPlayer.innerHTML = `<iframe src="${embedUrl}" width="100%" height="80" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>`;
+    showToast('🎵 تم تحميل مشغل Spotify', '');
+});
+
+// ============ PWA / INSTALL ============
+function setupPWA() {
+    const manifest = {
+        name: 'مؤقت برو - Timer Pro',
+        short_name: 'مؤقت برو',
+        description: 'مؤقت احترافي: تنازلي، ساعة إيقاف، بومودورو',
+        start_url: location.href,
+        display: 'standalone',
+        orientation: 'any',
+        background_color: '#0a0a14',
+        theme_color: '#0a0a14',
+        lang: 'ar',
+        dir: 'rtl',
+        icons: [
+            {
+                src: 'data:image/svg+xml,' + encodeURIComponent(
+                    `<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+                    <rect width="192" height="192" rx="40" fill="#7c6af5"/>
+                    <text x="96" y="125" text-anchor="middle" font-size="100" fill="white">⏱️</text></svg>`),
+                sizes: '192x192', type: 'image/svg+xml', purpose: 'any maskable'
+            },
+            {
+                src: 'data:image/svg+xml,' + encodeURIComponent(
+                    `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+                    <rect width="512" height="512" rx="100" fill="#7c6af5"/>
+                    <text x="256" y="330" text-anchor="middle" font-size="270" fill="white">⏱️</text></svg>`),
+                sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable'
+            }
+        ]
+    };
+
+    let link = document.querySelector('link[rel="manifest"]');
+    if (!link) { link = document.createElement('link'); link.rel = 'manifest'; document.head.appendChild(link); }
+    const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+    link.href = URL.createObjectURL(blob);
+
+    let touchIcon = document.querySelector('link[rel="apple-touch-icon"]');
+    if (!touchIcon) {
+        touchIcon = document.createElement('link');
+        touchIcon.rel = 'apple-touch-icon';
+        document.head.appendChild(touchIcon);
+    }
+    const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180">
+        <rect width="180" height="180" rx="36" fill="#7c6af5"/>
+        <text x="90" y="120" text-anchor="middle" font-size="90" fill="white">⏱️</text></svg>`;
+    touchIcon.href = 'data:image/svg+xml,' + encodeURIComponent(iconSvg);
+
+    if ('serviceWorker' in navigator) {
+        const sw = `
+const CACHE = 'timer-pro-v1';
+self.addEventListener('install', e => { self.skipWaiting(); });
+self.addEventListener('activate', e => { e.waitUntil(clients.claim()); });
+self.addEventListener('fetch', e => {
+    e.respondWith(
+        caches.match(e.request).then(r => r || fetch(e.request).then(res => {
+            if (res && res.status === 200) {
+                const clone = res.clone();
+                caches.open(CACHE).then(c => c.put(e.request, clone));
+            }
+            return res;
+        }).catch(() => caches.match(e.request)))
+    );
+});`;
+        const swBlob = new Blob([sw], { type: 'application/javascript' });
+        const swUrl = URL.createObjectURL(swBlob);
+        navigator.serviceWorker.register(swUrl)
+            .then(() => console.log('✅ SW registered'))
+            .catch(() => console.log('ℹ️ SW: blob SW needs server context'));
+    }
+}
+
+function installApp() {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(r => {
+            if (r.outcome === 'accepted') {
+                showToast('🎉 تم تثبيت التطبيق بنجاح!', '');
+                btnInstall.classList.add('hidden');
+                installBanner.classList.add('hidden');
+            }
+            deferredPrompt = null;
+        });
+    } else {
+        showToast('📲 افتح قائمة المتصفح ← "تثبيت" أو "إضافة للشاشة الرئيسية"', '');
+    }
+}
+
+// ============ EVENTS ============
+btnMain.addEventListener('click', () => {
+    if (state === 'running') pauseTimer();
+    else startTimer();
+});
+
+btnReset.addEventListener('click', resetTimer);
+btnLap.addEventListener('click', addLap);
+btnFs.addEventListener('click', toggleFs);
+btnFloat.addEventListener('click', togglePiP);
+
+btnTheme.addEventListener('click', () => {
+    document.body.classList.toggle('light');
+    applyTheme(); save();
+});
+
+btnKb.addEventListener('click', () => {
+    pnlKb.classList.toggle('hidden');
+    btnKb.classList.toggle('on');
+});
+
+btnInstall.addEventListener('click', installApp);
+bannerInstallBtn.addEventListener('click', installApp);
+bannerClose.addEventListener('click', () => {
+    installBanner.classList.add('hidden');
+    localStorage.setItem('bannerDismissed', '1');
+});
+
+btnApply.addEventListener('click', () => {
+    const h = parseInt(iH.value)||0, m = parseInt(iM.value)||0, s = parseInt(iS.value)||0;
+    const tot = h*3600+m*60+s;
+    if (tot <= 0) { showToast('⚠️ أدخل وقتاً صحيحاً', ''); return; }
+    applyPreset(tot);
+});
+
+btnSave.addEventListener('click', savePreset);
+
+[iH, iM, iS].forEach(inp => {
+    inp.addEventListener('change', () => {
+        let v = parseInt(inp.value)||0;
+        if (inp === iH) v = Math.max(0, Math.min(99, v));
+        else v = Math.max(0, Math.min(59, v));
+        inp.value = v;
+    });
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') btnApply.click(); });
+});
+
+btnPomoApply.addEventListener('click', () => {
+    pomWork = Math.max(1, Math.min(120, parseInt(pW.value)||25));
+    pomBreak = Math.max(1, Math.min(60, parseInt(pB.value)||5));
+    pomMaxCycles = Math.max(1, Math.min(8, parseInt(pC.value)||4));
+    pW.value = pomWork; pB.value = pomBreak; pC.value = pomMaxCycles;
+    if (mode === 'pomodoro' && state === 'idle') {
+        remSecs = pomWork * 60; totalSecs = remSecs;
+        pomIsWork = true; pomCycle = 1;
+        updateDisplay(); updateRing(); updateUI();
+    }
+    save();
+    showToast('✅ تم تحديث البومودورو', '');
+});
+
+modeTabs.forEach(t => {
+    t.addEventListener('click', () => {
+        if (t.dataset.mode !== mode) switchMode(t.dataset.mode);
+    });
+});
+
+chipsWrap.addEventListener('click', e => {
+    const chip = e.target.closest('.chip:not(.saved)');
+    if (chip) applyPreset(parseInt(chip.dataset.s));
+});
+
+btnClearHistory.addEventListener('click', () => {
+    if (!history.length) return;
+    if (confirm('هل تريد مسح سجل المؤقت؟')) {
+        history = []; renderHistory(); save();
+        showToast('🗑️ تم مسح السجل', '');
+    }
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT' && e.target.type !== 'file') return;
+    if (e.ctrlKey || e.metaKey) return;
+    switch(e.key.toLowerCase()) {
+        case ' ': e.preventDefault(); btnMain.click(); break;
+        case 'r': e.preventDefault(); resetTimer(); break;
+        case 'l': if (mode === 'stopwatch') { e.preventDefault(); addLap(); } break;
+        case 'f': e.preventDefault(); toggleFs(); break;
+        case '1': switchMode('countdown'); break;
+        case '2': switchMode('stopwatch'); break;
+        case '3': switchMode('pomodoro'); break;
+        case 'm':
+            isMuted = !isMuted; save();
+            showToast(isMuted ? '🔇 الصوت معطّل' : '🔊 الصوت مفعّل', '');
+            break;
+    }
+});
+
+window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    btnInstall.classList.remove('hidden');
+    installBadge.style.display = '';
+    setTimeout(() => { installBadge.style.display = 'none'; }, 8000);
+    if (!localStorage.getItem('bannerDismissed')) {
+        installBanner.classList.remove('hidden');
+    }
+});
+
+window.addEventListener('appinstalled', () => {
+    btnInstall.classList.add('hidden');
+    installBanner.classList.add('hidden');
+    deferredPrompt = null;
+    showToast('✅ التطبيق مثبّت على سطح المكتب!', '🎉');
+});
+
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        // Switch to background interval
+        if (state === 'running') {
+            if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+            startBgTimer();
+        }
+    } else {
+        // Stop background interval and resume RAF
+        if (bgInterval) { clearInterval(bgInterval); bgInterval = null; }
+        if (state === 'running') {
+            lastTick = performance.now();
+            if (mode === 'stopwatch') {
+                // Keep swStart unchanged; swElapsed is updated in background
+            }
+            rafId = requestAnimationFrame(tick);
+        }
+        updateDisplay();
+        updateRing();
+    }
+});
+
+window.addEventListener('beforeunload', save);
+
+// ============ INIT ============
+load();
+renderHistory();
+renderPresets();
+setupPWA();
+updateUI();
+updateDisplay();
+updateRing();
+updateBtn();
+
+// Start RAF loop for smooth stopwatch
+function loopDisplay() {
+    if (state === 'running' && mode === 'stopwatch') {
+        updateDisplay(); updateRing();
+    }
+    requestAnimationFrame(loopDisplay);
+}
+requestAnimationFrame(loopDisplay);
+
+console.log('⏱️ مؤقت برو جاهز');
+console.log('⌨️ [Space] بدء | [R] إعادة | [L] لفة | [F] ملء الشاشة | [M] صوت | [1-3] وضع');
+
+})();
+</script>
+</body>
+</html>
