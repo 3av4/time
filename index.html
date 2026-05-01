@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>MCTIERS - Bloody Era Edition</title>
+    <style>
+        @import url('https://googleapis.com');
+
+        :root {
+            --bg-body: #050505;
+            --bg-table: #0d0d0d;
+            --blood-red: #9e0101;
+            --diamond: linear-gradient(135deg, #00d2ff, #3a7bd5);
+            --gold: linear-gradient(135deg, #ffd700, #b8860b);
+            --silver: linear-gradient(135deg, #bdc3c7, #2c3e50);
+            --text-gray: #888;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            background-image: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('https://catbox.moe');
+            background-size: cover;
+            background-attachment: fixed;
+            color: white;
+            font-family: 'Inter', 'Cairo', sans-serif;
+            margin: 0;
+            padding: 50px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header-main {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header-main h1 {
+            font-family: 'Cairo', sans-serif;
+            font-size: 3.5rem;
+            color: var(--blood-red);
+            text-shadow: 0 0 20px rgba(158, 1, 1, 0.6);
+            margin: 0;
+        }
+
+        /* حاوية الجدول - مطابقة تماماً للموقع */
+        .rankings-table {
+            width: 100%;
+            max-width: 1100px;
+            border-collapse: collapse;
+            background: var(--bg-table);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8), 0 0 20px rgba(158, 1, 1, 0.2);
+            border: 1px solid #1a1a1a;
+        }
+
+        .rankings-table thead {
+            background: #151515;
+            color: var(--text-gray);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .rankings-table th {
+            padding: 15px 25px;
+            text-align: right;
+            border-bottom: 2px solid #1f1f1f;
+        }
+
+        /* صفوف اللاعبين */
+        .player-row {
+            border-bottom: 1px solid #1a1a1a;
+            transition: all 0.3s ease;
+        }
+
+        .player-row:hover {
+            background: rgba(158, 1, 1, 0.05);
+            transform: scale(1.005);
+        }
+
+        .rank-col { width: 60px; font-weight: 800; font-size: 1.2rem; text-align: center !important; }
+        .player-col { display: flex; align-items: center; gap: 15px; padding: 15px 25px; }
+        .region-col { width: 100px; }
+        .tiers-col { padding: 15px 25px; }
+
+        /* الأيقونات والمستويات */
+        .avatar {
+            width: 55px;
+            height: 55px;
+            border-radius: 6px;
+            background: #222;
+            border: 1px solid #333;
+            object-fit: cover;
+        }
+
+        .player-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            display: block;
+        }
+
+        .player-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-gray);
+        }
+
+        .region-box {
+            padding: 4px 10px;
+            background: #1a1a1a;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            color: var(--blood-red);
+            border: 1px solid var(--blood-red);
+        }
+
+        /* تصميم الـ Tiers كما في الصورة */
+        .tier-list {
+            display: flex;
+            gap: 12px;
+        }
+
+        .tier-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .tier-img { width: 22px; height: 22px; filter: drop-shadow(0 0 5px rgba(255,255,255,0.2)); }
+        
+        .tier-label {
+            font-size: 0.65rem;
+            background: #ffd70033;
+            color: #ffd700;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        /* ألوان البطاقات الملكية */
+        .diamond-rank { background: linear-gradient(90deg, rgba(0, 210, 255, 0.1) 0%, transparent 100%) !important; border-right: 5px solid #00d2ff; }
+        .diamond-rank .rank-col { color: #00d2ff; text-shadow: 0 0 10px #00d2ff; }
+
+        .gold-rank { background: linear-gradient(90deg, rgba(255, 215, 0, 0.1) 0%, transparent 100%) !important; border-right: 5px solid #ffd700; }
+        .gold-rank .rank-col { color: #ffd700; text-shadow: 0 0 10px #ffd700; }
+
+        .silver-rank { background: linear-gradient(90deg, rgba(189, 195, 199, 0.1) 0%, transparent 100%) !important; border-right: 5px solid #bdc3c7; }
+        .silver-rank .rank-col { color: #bdc3c7; text-shadow: 0 0 10px #bdc3c7; }
+
+        /* تأثيرات دموية إضافية */
+        .blood-effect {
+            position: absolute;
+            right: 0;
+            height: 100%;
+            width: 5px;
+            background: var(--blood-red);
+            box-shadow: 0 0 15px var(--blood-red);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="header-main">
+        <h1>THE BLOODY ERA</h1>
+        <p style="color: var(--text-gray); font-weight: bold;">أساطير القتال | نظام التصنيف العالمي</p>
+    </div>
+
+    <table class="rankings-table">
+        <thead>
+            <tr>
+                <th style="text-align: center;">#</th>
+                <th>PLAYER</th>
+                <th>REGION</th>
+                <th>TIERS</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- حسن - المركز الأول (ماسي) -->
+            <tr class="player-row diamond-rank">
+                <td class="rank-col">1.</td>
+                <td>
+                    <div class="player-col">
+                        <img src="https://catbox.moe" class="avatar">
+                        <div>
+                            <span class="player-name">حسن</span>
+                            <span class="player-subtitle">Combat Grandmaster (1000 Points)</span>
+                        </div>
+                    </div>
+                </td>
+                <td class="region-col"><span class="region-box">GOD</span></td>
+                <td class="tiers-col">
+                    <div class="tier-list">
+                        <div class="tier-item"><img src="https://mctiers.com" class="tier-img"><span class="tier-label">HT1</span></div>
+                        <div class="tier-item"><img src="https://mctiers.com" class="tier-img"><span class="tier-label">HT1</span></div>
+                    </div>
+                </td>
+            </tr>
+
+            <!-- تونه - المركز الثاني (ذهبي) -->
+            <tr class="player-row gold-rank">
+                <td class="rank-col">2.</td>
+                <td>
+                    <div class="player-col">
+                        <img src="https://catbox.moe" class="avatar">
+                        <div>
+                            <span class="player-name">تونه</span>
+                            <span class="player-subtitle">Combat Master (850 Points)</span>
+                        </div>
+                    </div>
+                </td>
+                <td class="region-col"><span class="region-box">ELITE</span></td>
+                <td class="tiers-col">
+                    <div class="tier-list">
+                        <div class="tier-item"><img src="https://mctiers.com" class="tier-img"><span class="tier-label">HT1</span></div>
+                        <div class="tier-item"><img src="https://mctiers.com" class="tier-img"><span class="tier-label">LT1</span></div>
+                    </div>
+                </td>
+            </tr>
+
+            <!-- عبد 1 - المركز الثالث (فضي) -->
+            <tr class="player-row silver-rank">
+                <td class="rank-col">3.</td>
+                <td>
+                    <div class="player-col">
+                        <img src="https://catbox.moe" class="avatar">
+                        <div>
+                            <span class="player-name">عبد الاول</span>
+                            <span class="player-subtitle">Combat Master (700 Points)</span>
+                        </div>
+                    </div>
+                </td>
+                <td class="region-col"><span class="region-box">VET</span></td>
+                <td class="tiers-col">
+                    <div class="tier-list">
+                        <div class="tier-item"><img src="https://mctiers.com" class="tier-img"><span class="tier-label">HT1</span></div>
+                    </div>
+                </td>
+            </tr>
+
+            <!-- حمدية -->
+            <tr class="player-row">
+                <td class="rank-col">4.</td>
+                <td>
+                    <div class="player-col">
+                        <img src="https://catbox.moe" class="avatar">
+                        <div>
+                            <span class="player-name">حمدية</span>
+                            <span class="player-subtitle">Combat Master (550 Points)</span>
+                        </div>
+                    </div>
+                </td>
+                <td class="region-col"><span class="region-box">BLOOD</span></td>
+                <td class="tiers-col">
+                    <div class="tier-list">
+                        <div class="tier-item"><img src="https://mctiers.com" class="tier-img"><span class="tier-label">LT1</span></div>
+                    </div>
+                </td>
+            </tr>
+
+            <!-- عبد 2 -->
+            <tr class="player-row">
+                <td class="rank-col">5.</td>
+                <td>
+                    <div class="player-col">
+                        <img src="https://catbox.moe" class="avatar">
+                        <div>
+                            <span class="player-name">عبد الثاني</span>
+                            <span class="player-subtitle">Warrior (400 Points)</span>
+                        </div>
+                    </div>
+                </td>
+                <td class="region-col"><span class="region-box">BLOOD</span></td>
+                <td class="tiers-col">
+                    <div class="tier-list">
+                        <div class="tier-item"><img src="https://mctiers.com" class="tier-img"><span class="tier-label">LT2</span></div>
+                    </div>
+                </td>
+            </tr>
+
+            <!-- لينصو -->
+            <tr class="player-row">
+                <td class="rank-col">6.</td>
+                <td>
+                    <div class="player-col">
+                        <img src="https://catbox.moe" class="avatar">
+                        <div>
+                            <span class="player-name">لينصو</span>
+                            <span class="player-subtitle">Slayer (350 Points)</span>
+                        </div>
+                    </div>
+                </td>
+                <td class="region-col"><span class="region-box">BLOOD</span></td>
+                <td class="tiers-col">
+                    <div class="tier-list">
+                        <div class="tier-item"><img src="https://mctiers.com" class="tier-img"><span class="tier-label">HT3</span></div>
+                    </div>
+                </td>
+            </tr>
+
+            <!-- نيرو -->
+            <tr class="player-row">
+                <td class="rank-col">7.</td>
+                <td>
+                    <div class="player-col">
+                        <img src="https://catbox.moe" class="avatar">
+                        <div>
+                            <span class="player-name">نيرو</span>
+                            <span class="player-subtitle">Shadow (300 Points)</span>
+                        </div>
+                    </div>
+                </td>
+                <td class="region-col"><span class="region-box">BLOOD</span></td>
+                <td class="tiers-col">
+                    <div class="tier-list">
+                        <div class="tier-item"><img src="https://mctiers.com" class="tier-img"><span class="tier-label">LT2</span></div>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div style="margin-top: 50px; color: #444; font-size: 0.7rem; font-family: sans-serif;">
+        MCTIERS BLOODY DESIGN | ACTIVATE WINDOWS
+    </div>
+
+</body>
+</html>
